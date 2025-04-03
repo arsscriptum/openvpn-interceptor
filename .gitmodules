@@ -1,0 +1,6 @@
+[submodule "external/jsmn"]
+	path = external/jsmn
+	url = https://github.com/zserge/jsmn
+[submodule "external/cpp-httplib"]
+	path = external/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib

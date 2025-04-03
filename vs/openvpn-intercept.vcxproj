@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleasePList|Win32">
+      <Configuration>ReleasePList</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleasePList|x64">
+      <Configuration>ReleasePList</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="QtConf">
+    <QtVersion>5.12.4</QtVersion>
+    <QTDIR>$(QtRootPath)</QTDIR>
+    <QtExternalDir>$(QtRootPath)</QtExternalDir>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{744e0100-d910-4a07-8021-91456ebd2484}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>openvpn-intercept</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(ProjectDir)cfg\winapp.props" Label="ProjectConfig" />
+  <Import Project="$(ProjectDir)cfg\dejainsight.props" Condition="'$(dejainsight_integration)' == ''" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemGroup>
+    <RootQRCFiles Include="$(SolutionDir)*.qrc" />
+    <AllPs1Files Include="$(SolutionDir)res\**\*.ps1" />
+    <RCCFiles Include="$(SolutionDir)*.rcc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)'=='ReleasePList'">
+    <TargetName>openvpn-intercept</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TargetName>openvpn-intercept</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <TargetName>openvpn-intercept</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePList|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <!--<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleasePList|x64'">
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetFileName) $(ToolsRoot)</Command>
+    </PostBuildEvent> 
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetFileName) $(ToolsRoot)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>-->
+  <ItemGroup>
+    <ClCompile Include="$(ProjectRoot)src\main.cpp" />
+    <ClCompile Include="$(ProjectRoot)src\stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\src\cdll.cpp" />
+    <ClCompile Include="..\src\cmdline.cpp" />
+    <ClCompile Include="..\src\init.cpp" />
+    <ClCompile Include="..\src\log.cpp" />
+    <ClCompile Include="..\src\win32.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(ProjectRoot)src\resources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\cdll.h" />
+    <ClInclude Include="..\src\cmdline.h" />
+    <ClInclude Include="..\src\log.h" />
+    <ClInclude Include="..\src\macros.h" />
+    <ClInclude Include="..\src\nowarns.h" />
+    <ClInclude Include="..\src\stdafx.h" />
+    <ClInclude Include="..\src\targetver.h" />
+    <ClInclude Include="..\src\win32.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <Target Name="CustomClean" BeforeTargets="BeforeBuild">
+    <Message Text="Custom Clean" Importance="high" />
+    <ItemGroup>
+      <_CustomFilesToDelete Include="$(ProjectRoot)\bin\x64\Release\*" />
+    </ItemGroup>
+    <Delete Files="@(_CustomFilesToDelete)" />
+  </Target>
+  <ItemGroup Condition="'$(UsingQt5)' == '1'">
+    <QtRcc Include="$(AppResourceFile)">
+      <QmlCacheGenerate>false</QmlCacheGenerate>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+</Project>

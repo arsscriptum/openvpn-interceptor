@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+
+  <!-- General Environment values -->
+  <PropertyGroup Label="ServiceMacros">
+     <ProjectRoot>$(ProjectDir)..\</ProjectRoot>
+     <TempRoot>$(ProjectDir)</TempRoot>
+     <UsingQt5>0</UsingQt5>
+     <UsingWinsock>0</UsingWinsock>
+     <UsingOpenSSL>0</UsingOpenSSL>
+     <UsingJSMNLib>0</UsingJSMNLib>
+     <UsingHTTPLib>0</UsingHTTPLib>
+     <SolutionRootDirectory>$(ProjectDir)..\</SolutionRootDirectory>
+     <ExternalDirectory>$(SolutionRootDirectory)\external</ExternalDirectory>
+  </PropertyGroup> 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <CharacterSet>NotSet</CharacterSet>
+    <UseDebugLibraries>true</UseDebugLibraries>    
+  </PropertyGroup> 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <CharacterSet>NotSet</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>    
+  </PropertyGroup>   
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseUnicode'">
+    <CharacterSet>NotSet</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>    
+  </PropertyGroup> 
+  <PropertyGroup Label="ModuleMacros">
+    <ProjectOutputDirectory>$(SolutionRootDirectory)bin\$(Platform)\$(Configuration)</ProjectOutputDirectory>
+    <ProjectObjectDirectory>$(TempRoot)___temp_compilation_files\obj\$(TargetName)\$(Platform)\$(Configuration)</ProjectObjectDirectory>
+    <AppResourceFile>$(ProjectObjectDirectory)\app_resource.qrc</AppResourceFile>
+  </PropertyGroup>
+  <PropertyGroup Label="GeneralConfig">
+    <OutDir>$(ProjectOutputDirectory)\</OutDir>
+    <IntDir>$(ProjectObjectDirectory)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Label="WinsockConfig" Condition="'$(UsingWinsock)'=='1'">
+    <WinsockLib>wsock32.lib</WinsockLib>
+  </PropertyGroup>
+
+
+  <PropertyGroup Label="OpenSSLConfig" Condition="'$(UsingOpenSSL)'=='1'">
+    <OpenSSL_RootDirectory>$(ExternalDirectory)\openssl</OpenSSL_RootDirectory>
+    <OpenSSL_Include_Directory>$(OpenSSL_RootDirectory)\include</OpenSSL_Include_Directory>
+    <OpenSSL_Library_Directory>$(OpenSSL_RootDirectory)\lib</OpenSSL_Library_Directory>
+    <OpenSSL_Binary_Directory>$(OpenSSL_RootDirectory)\bin</OpenSSL_Binary_Directory>
+    <OpenSSL_Defines>CPPHTTPLIB_OPENSSL_SUPPORT;USING_OPENSSL</OpenSSL_Defines>
+    <OpenSSL_Lib_Static>libssl_static.lib</OpenSSL_Lib_Static>
+    <OpenSSL_Lib>openssl.lib</OpenSSL_Lib>
+    <LibCrypto_Lib_Static>libcrypto_static.lib</LibCrypto_Lib_Static>
+    <LibCrypto_Lib>libcrypto.lib</LibCrypto_Lib>
+  </PropertyGroup>
+
+  <PropertyGroup Label="JSMNLibConfig" Condition="'$(UsingJSMNLib)'=='1'">
+    <JSMNLIB_RootDirectory>$(ExternalDirectory)\jsmn</JSMNLIB_RootDirectory>
+    <JSMN_Defines>USING_JSONLIB;JSMN_STATIC</JSMN_Defines>
+  </PropertyGroup>
+
+  <PropertyGroup Label="HTTPLibConfig" Condition="'$(UsingHTTPLib)'=='1'">
+    <HTTPLIB_RootDirectory>$(ExternalDirectory)\cpp-httplib</HTTPLIB_RootDirectory>
+    <HTTPLib_Defines>USING_HTTPLIB</HTTPLib_Defines>
+  </PropertyGroup>
+
+
+
+  <ItemDefinitionGroup>
+    <QtRcc>
+      <ExecutionDescription>Embedding QML files: Generating C++ code from script files in '%(Identity)'...</ExecutionDescription>
+      <!-- This output source file will contain all QML/JS resources as binary and Init function -->
+      <OutputFile>$(ProjectDir)CompiledResources\bytecode_%(Filename).cpp</OutputFile>
+      <!-- Enable verbose mode '-verbose' -->
+      <Verbose>true</Verbose>
+      <!-- Disable all compression '-no-compress' (false by default, should be false in final product) -->
+      <NoCompression>false</NoCompression>
+      <!-- Output a binary file for use as a dynamic source '<minus-minus->binary' -->
+      <BinaryOutput>false</BinaryOutput>
+      <!-- Run work in parallel processes or not, this was buggy last time I tried. No big time improvement, keep it off -->
+      <ParallelProcess>false</ParallelProcess>
+      <!-- Compress input files by <level> '-compress <level>'  
+           The level is a int from 1 to 9 and represent the zlib compression levels 
+          #define Z_NO_COMPRESSION         0
+          #define Z_BEST_SPEED             1 22Mb, 4.8Mb Dll  level1
+          #define Z_BEST_COMPRESSION       9 19Mb, 4.0Mb Dll  level9
+          #define Z_DEFAULT_COMPRESSION  (-1) 20Mb, 4.1Mb Dll default
+          -no-compress make a 5.8Mb Dll
+        -->
+      <Compression>default</Compression>
+      <!--  Threshold to consider compressing files '-threshold <level>' 
+            Specifies a threshold (in bytes) to use when compressing files. 
+            If the file is smaller than the threshold, it will not be compressed, independent of what the compression level is.
+            Keep this unset, it is not used and be default behavior
+      <CompressThreshold></CompressThreshold>
+      -->
+      <InitFuncName>ScvResourceInit</InitFuncName>
+    </QtRcc>
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(OpenSSL_Include_Directory);$(HTTPLIB_RootDirectory);$(JSMNLIB_RootDirectory);$(ProjectRoot)src;$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEJA_DISABLED;$(JSMN_Defines);$(HTTPLib_Defines);$(OpenSSL_Defines);CCC_STATIC_LINKING;_CRT_SECURE_NO_WARNINGS;CC_WINAPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <!-- 
+        SUBSYSTEM; Console or Windows
+      -->
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(OpenSSL_Library_Directory);$(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(OpenSSL_Lib_Static);$(LibCrypto_Lib_Static);$(WinsockLib);shlwapi.lib;netapi32.lib;user32.lib;comctl32.lib</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>DEBUG;DEVELOPMENT;DEBUG_INFO;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>RELEASE;DEVELOPMENT;DEBUG_INFO;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='ReleasePList'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>RELEASE;DEVELOPMENT;DEBUG_INFO;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>  
+ 
+
+  <Target Name="PrintBuildConfig" BeforeTargets="InitializeBuildStatus">
+    <Message Text="================================================================================================" />
+    <Message Text="    *** application props ***   " />
+    <Message Text="CharacterSet: $(CharacterSet)." />
+    <Message Text="UseDebugLibraries: $(UseDebugLibraries)." />
+    <Message Text="Optimization: $(Optimization)." />
+    <Message Text="PreprocessorDefinitions: $(PreprocessorDefinitions)." />            
+    <Message Text="AdditionalDependencies: $(AdditionalDependencies)." />
+    <Message Text=" ***** QT ***** UsingQt5: $(UsingQt5)." />
+    <Message Text="Optimization: $(Optimization)." />
+    <Message Text="OptimizeReferences: $(OptimizeReferences)." />
+    <Message Text="IntrinsicFunctions: $(IntrinsicFunctions)." />
+    <Message Text="FunctionLevelLinking: $(FunctionLevelLinking)." />
+    <Message Text="================================================================================================" />
+  </Target>
+</Project>
+
+
+
+
