@@ -258,7 +258,12 @@ function Repair-CertificateFile {
     Remove-Item -Path "$TempCertFile" -Force -Recurse -ErrorAction Ignore | Out-Null
     New-Item -Path "$TempCertFile" -Force -ItemType file -ErrorAction Ignore | Out-Null
 
-    $CertDataFormatted = Format-CertificateBlock $InputPath
+    if (-not (Test-Path $InputPath)) {
+            throw "Input file not found: $InputPath"
+    }
+
+    [string]$CertificateBlock = Get-Content -Path $InputPath -Raw
+    $CertDataFormatted = Format-CertificateBlock $CertificateBlock
 
     if($Save){
         [string]$OutputPath = Join-Path $((Get-Item $InputPath).DirectoryName) $((Get-Item $InputPath).Basename + "_formated.pem")
@@ -267,7 +272,7 @@ function Repair-CertificateFile {
     }
 
     if($Test){
-        Set-Content -Path "$TempCertFile"
+        $CertDataFormatted | Set-Content "$TempCertFile" -Force -ErrorAction Stop
         [string[]]$CertificateText = & "$OpenSslExe" 'x509' '-in' "$TempCertFile" '-text' '-noout'
         $IsInvalid = $Res[0].StartsWith('Could not find certificate')
         if ($IsInvalid) {

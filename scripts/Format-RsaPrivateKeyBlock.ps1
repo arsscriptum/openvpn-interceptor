@@ -17,17 +17,14 @@ function Format-RsaPrivateKeyBlock {
     )
 
     try {
-        if (-not (Test-Path $InputPath)) {
-            throw "Input file not found: $InputPath"
-        }
+        
         $beginHeader = "-----BEGIN RSA PRIVATE KEY-----"
         $endHeader = "-----END RSA PRIVATE KEY-----"
         $beginKey = "<key>"
         $endKey = "</key>"
 
-        [string]$allrawlines = Get-Content -Path $InputPath -Raw
-        [string]$allrawlines = $allrawlines.Replace("`r", '').Replace("`n", '')
-
+        
+        [string]$allrawlines = $PrivateKeyBlock.Replace("`r", '').Replace("`n", '')
 
         $allrawlines = $allrawlines -replace "`r", '' -replace "`n+", "`n" # Normalize to Unix-style
 
