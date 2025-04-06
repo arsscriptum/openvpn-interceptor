@@ -96,7 +96,6 @@ function Repair-RsaPrivateKeyFile {
         $outputLines = Format-RsaPrivateKeyBlock $allrawlines
         
         if($Save){
-            $OutputPath = (Get-Item $InputPath).Basename + ".pem"
             [string]$OutputPath = Join-Path $((Get-Item $InputPath).DirectoryName) $((Get-Item $InputPath).Basename + "_formated.pem")
             $outputLines | Set-Content -Path "$OutputPath" -Force
             Write-Host "✅ PEM format fixed and saved to: $OutputPath" -f DarkRed
