@@ -10,10 +10,7 @@ How to use Freedome VPN without the official client on Android, Windows, Linux, 
 
 ### Prerequisites you must download and install:
 
-1. Have Windows and the official client
 1. Download Wireshark and install it
-1. Download RawCap and install it
-1. Compile openvpn-intercept and configure it
 
 ### Get your private key / certificate
 
@@ -72,14 +69,16 @@ use *[scripts/Get-FSecureSiteList.ps1](scripts/Get-FSecureSiteList.ps1)* <a id="
 
 If you have your private key, password, the CA cert already and the gateway you wish then you can replace values here .. code-block:
 
+Important: **comment out ; pull-filter ignore redirect-gateway** That means the server does tell the client to redirect the traffic, but the client is still explicitly configured to ignore this push.
+
 ```bash
 <ca>
-C:\\Programs\\OpenVPN\\x1.crt
+CERTIFICATE HERE
 </ca>
 <key>
-C:\\Programs\\OpenVPN\\client.key
+PRIVATE KEY HERE
 </key>
-cert "C:\\Programs\\OpenVPN\\client.crt"
+cert <cert path here>
 verb 4
 client
 dev tun
@@ -102,18 +101,18 @@ data-ciphers AES-256-GCM:AES-128-GCM:AES-256-CBC
 allow-compression no
 cipher AES-256-CBC
 auth SHA256
-route-nopull
-pull-filter ignore redirect-gateway
+; pull-filter ignore redirect-gateway
 <connection>
 fragment 1400
-remote freedome-ca-montreal.freedome-vpn.net 2747
+remote freedome-ca-montreal.freedome-vpn.net 2747 
 proto udp
 explicit-exit-notify 1
 </connection>
 <connection>
-remote freedome-ca-montreal.freedome-vpn.net 443
+remote freedome-ca-montreal.freedome-vpn.net 443 
 proto tcp-client
 </connection>
+
 ```
 
 
@@ -216,7 +215,7 @@ To do this, you need **my memory search tool** [console.memgrep](https://github.
 
 <a id="ref12"></a>[12] 
 
-![12](img/key1.png)
+![12](img/key2.png)
 
 -------------------------------
 

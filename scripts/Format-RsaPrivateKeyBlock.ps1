@@ -9,14 +9,11 @@
 #└────────────────────────────────────────────────────────────────────────────────┘
 
 
-function Fix-RsaPrivateKeyPem {
+function Format-RsaPrivateKeyBlock {
     [CmdletBinding(SupportsShouldProcess)]
     param(
-        [Parameter(Mandatory = $true, HelpMessage = "Path to original RSA private key (unenforced format)")]
-        [string]$InputPath,
-
-        [Parameter(Mandatory = $false, HelpMessage = "Output path (defaults to .pem)")]
-        [string]$OutputPath = ($InputPath -replace '\.txt$', '.pem')
+        [Parameter(Mandatory = $true,Position=0)]
+        [string]$PrivateKeyBlock
     )
 
     try {
@@ -63,26 +60,50 @@ function Fix-RsaPrivateKeyPem {
         $allrawlines = ($allrawlines -split '(.{1,64})' | Where-Object { [string]::IsNullOrEmpty($_) -eq $False }) -join "`n"
         [string[]]$lines = $allrawlines.split("`n") | Where-Object { [string]::IsNullOrEmpty($_) -eq $False }
 
-
-
         $dekLine = ($lines -split "`n" | Where-Object { $_ -match '^DEK-Info: ' })
         $dekLineIndex = $lines.IndexOf($dekLine)
-        $outputLines = @()
+        
         $i = 0
         $added = $false
         foreach ($l in $lines) {
-            $outputLines += "$l"
             if (($i -eq $dekLineIndex) -and ($added -eq $False)) {
                 $added = $true
-                $outputLines += "`n"
+                Write-Output "$l`n"
+            }else{
+                Write-Output "$l"
             }
             $i++
         }
 
-        $outputLines | Set-Content -Path $OutputPath -Encoding ASCII
+    }
+    catch {
+        Write-Error "❌ Error: $_"
+    }
+}
 
-        Write-Host "✅ PEM format fixed and saved to: $OutputPath" -f DarkRed
 
+function Repair-RsaPrivateKeyFile {
+    [CmdletBinding(SupportsShouldProcess)]
+    param(
+        [Parameter(Mandatory = $true, HelpMessage = "Path to original RSA private key (unenforced format)")]
+        [string]$InputPath,
+        [Parameter(Mandatory = $false)]
+        [switch]$Save
+    )
+    try {
+        if (-not (Test-Path $InputPath)) {
+            throw "Input file not found: $InputPath"
+        }
+    
+        [string]$allrawlines = Get-Content -Path $InputPath -Raw
+        $outputLines = Format-RsaPrivateKeyBlock $allrawlines
+        
+        if($Save){
+            $OutputPath = (Get-Item $InputPath).Basename + ".pem"
+            [string]$OutputPath = Join-Path $((Get-Item $InputPath).DirectoryName) $((Get-Item $InputPath).Basename + "_formated.pem")
+            $outputLines | Set-Content -Path "$OutputPath" -Force
+            Write-Host "✅ PEM format fixed and saved to: $OutputPath" -f DarkRed
+        }
         $outputLines
     }
     catch {
